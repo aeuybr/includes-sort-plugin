@@ -1,7 +1,13 @@
 import * as vscode from 'vscode';
 
-// Функция сортировки
-function sortIncludes() {
+/**
+ * Сортирует инклюды в открытом документе.
+ *
+ * @remarks
+ * Находит первый блок #include, удаляет дубликаты
+ * и сортирует заголовки по алфавиту.
+ */
+export function sortIncludes() {
     // Получаем открытое окно с текстом
     let editor = vscode.window.activeTextEditor;
     if (editor === undefined) {
@@ -88,10 +94,16 @@ function sortIncludes() {
     vscode.window.showInformationMessage("Отсортировано!");
 }
 
+/**
+ * @brief Регистрирует команду расширения в VS Code.
+ * @param context Контекст расширения.
+ */
 export function activate(context: vscode.ExtensionContext) {
     let command = vscode.commands.registerCommand('cpp-sort-includes.sort', sortIncludes);
     context.subscriptions.push(command);
 }
 
-// Деактивация
+/**
+ * Выполняет деактивацию расширения.
+ */
 export function deactivate() {}

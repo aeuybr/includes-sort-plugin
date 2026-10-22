@@ -1,71 +1,89 @@
-# cpp-sort-includes README
+# cpp-sort-includes
 
-This is the README for your extension "cpp-sort-includes". After writing up a brief description, we recommend including the following sections.
+Небольшое расширение для Visual Studio Code. Оно сортирует `#include <...>` в C++-файле и убирает повторы.
 
-## Features
+## Автор
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- Ширкунов Евгений Дмитриевич
+- Группа M3105
 
-For example if there is an image subfolder under your extension project workspace:
+## Что умеет расширение
 
-\!\[feature X\]\(images/feature-x.png\)
+Расширение находит первый блок инклюдов в открытом файле, сортирует их по алфавиту и удаляет повторяющиеся строки.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+До сортировки:
 
-## Requirements
+```cpp
+#include <vector>
+#include <iostream>
+#include <vector>
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+int main() {}
+```
 
-## Extension Settings
+После сортировки:
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+```cpp
+#include <iostream>
+#include <vector>
 
-For example:
+int main() {}
+```
 
-This extension contributes the following settings:
+## Описание функций
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+### `sortIncludes(): void`
 
-## Known Issues
+Сортирует первый найденный блок директив `#include <...>` в открытом документе и удаляет повторяющиеся заголовки.
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+**Параметры:** нет. Текст берётся из активного редактора VS Code.
 
-## Release Notes
+**Что делает:** разбивает текст на строки, находит блок инклюдов, собирает заголовки в массив, удаляет повторы, сортирует их и заменяет исходный блок.
 
-Users appreciate release notes as you update your extension.
+**Возвращаемое значение:** нет (`void`). Функция изменяет открытый документ. Если редактор или подходящие инклюды не найдены, показывает сообщение.
 
-### 1.0.0
+### `activate(context: vscode.ExtensionContext): void`
 
-Initial release of ...
+Вызывается VS Code при активации расширения.
 
-### 1.0.1
+**Параметр:**
+- `context` (`vscode.ExtensionContext`) — объект контекста расширения, передаваемый VS Code.
 
-Fixed issue #.
+**Что делает:** регистрирует команду `cpp-sort-includes.sort` и связывает её с функцией `sortIncludes()`.
 
-### 1.1.0
+**Возвращаемое значение:** нет (`void`).
 
-Added features X, Y, and Z.
+### `deactivate(): void`
 
----
+Вызывается при выключении расширения.
 
-## Following extension guidelines
+**Параметры:** нет.
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+**Что делает:** дополнительных действий не выполняет.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+**Возвращаемое значение:** нет (`void`).
 
-## Working with Markdown
+## Как запустить
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+1. Установить Node.js и Visual Studio Code.
+2. Скачать проект и перейти в его папку:
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+   ```sh
+   git clone https://github.com/aeuybr/includes-sort-plugin.git
+   cd includes-sort-plugin
+   ```
 
-## For more information
+3. Установить зависимости:
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+   ```sh
+   npm install
+   ```
 
-**Enjoy!**
+4. Открыть папку проекта в VS Code и нажать `F5`. Откроется отдельное окно с запущенным расширением.
+5. В этом окне открыть C++-файл, вызвать палитру команд сочетанием `Ctrl+Shift+P` или `Cmd+Shift+P` и выбрать **Sort Includes**.
+
+## Ограничения
+
+Расширение обрабатывает директивы вида `#include <iostream>`. Инклюды в кавычках, например `#include "my_header.h"`, оно пока не сортирует.
+
+Если подходящих инклюдов нет, расширение показывает сообщение об этом.
