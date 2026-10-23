@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
  * и сортирует заголовки по алфавиту.
  */
 export function sortIncludes() {
-    // Получаем открытое окно с текстом
     let editor = vscode.window.activeTextEditor;
     if (editor === undefined) {
         vscode.window.showErrorMessage("Файл не открыт!");
@@ -17,49 +16,43 @@ export function sortIncludes() {
 
     let document = editor.document;
     let text = document.getText();
-    let lines = text.split('\n'); // разбиваем на строки
+    let lines = text.split('\n'); 
 
     let first_line = -1;
     let last_line = -1;
 
-    // Ищем где начинается и заканчивается блок инклюдов
     for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trim(); // убираем пробелы по краям
+        let cur_line = lines[i].trim(); 
         
-        // Проверяем, что строка начинается с #include <
-        if (line.startsWith("#include <")) {
+        if (cur_line.startsWith("#include <")) {
             if (first_line === -1) {
                 first_line = i;
             }
             last_line = i;
-        } else if (first_line !== -1 && line !== "") {
-            // Если блок начался, но пошла другая строка — останавливаемся
+        } else if (first_line !== -1 && cur_line !== "") {
             break;
         }
     }
 
-    // Если инклюдов нет
     if (first_line === -1) {
         vscode.window.showInformationMessage("Нет инклюдов для сортировки");
         return;
     }
 
-    let includes: string[] = []; // сюда собираем сами названия (например iostream)
+    let includes: string[] = []; 
 
-    // Вытаскиваем названия из строк
     for (let i = first_line; i <= last_line; i++) {
-        let line = lines[i].trim();
-        if (line.startsWith("#include <")) {
-            let startIndex = 10; // длина слова "#include <" (10 символов)
-            let endIndex = line.indexOf(">"); // ищем закрывающую скобку
+        let cur_line = lines[i].trim();
+        if (cur_line.startsWith("#include <")) {
+            let startIndex = 10;
+            let endIndex = cur_line.indexOf(">"); 
             if (endIndex !== -1) {
-                let name = line.substring(startIndex, endIndex);
+                let name = cur_line.substring(startIndex, endIndex);
                 includes.push(name);
             }
         }
     }
 
-    // Убираем дубликаты 
     let unique_includes: string[] = [];
     for (let i = 0; i < includes.length; i++) {
         let duplicate = false;
@@ -74,20 +67,17 @@ export function sortIncludes() {
         }
     }
 
-    // Сортируем по алфавиту (встроенный метод)
     unique_includes.sort();
 
-    // Собираем обратно в строки
     let new_lines: string[] = [];
     for (let i = 0; i < unique_includes.length; i++) {
         new_lines.push("#include <" + unique_includes[i] + ">");
     }
 
-    // Записываем изменения в файл
     let edit = new vscode.WorkspaceEdit();
     let range = new vscode.Range(first_line, 0, last_line, lines[last_line].length);
     
-    let new_text = new_lines.join('\n'); // склеиваем массив обратно в текст
+    let new_text = new_lines.join('\n'); 
     edit.replace(document.uri, range, new_text);
     
     vscode.workspace.applyEdit(edit);
